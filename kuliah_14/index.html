@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<!-- Helps the browser identify support for mobile applications -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<!-- Title on the browser tab -->
+	<title>WebGIS</title>
+	<!-- Leaflet CSS Library -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.2/dist/leaflet.css" />
+	<!-- Leaflet JavaScript Library -->
+	<script src="https://unpkg.com/leaflet@1.0.2/dist/leaflet.js"></script>
+	<!-- Style for the fullscreen map display -->
+	<style>
+		html,
+		body,
+		#map {
+			height: 100%;
+			width: 100%;
+			margin: 0;
+		}
+	</style>
+</head>
+<body>
+	<!-- HTML Block to display the map -->
+	<div id="map"></div>
+	<script>
+		// Init map with a Jogja-centered view
+		var map = L.map('map', {
+			center: [-7.7929, 110.3658],
+			zoom: 12
+		});
+
+		/* Tile Basemap */
+		var basemap0 = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			maxZoom: 19,
+			attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+		});
+
+		var OpenStreetMap_HOT = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+			maxZoom: 19,
+			attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, HOT'
+		});
+
+		var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+			attribution: 'Tiles &copy; Purnama Akbar &mdash; 246111202 Statistics Program Study at Universitas Islam Indonesia'
+		});
+
+		var OpenTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+			maxZoom: 17,
+			attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+		});
+
+		// Calls the basemap to be displayed when the page is loaded
+		Esri_WorldImagery.addTo(map);
+
+		/* Control Layer */
+		var baseMaps = {
+			'Open Street Map': basemap0,
+			'Open Street Map Hot': OpenStreetMap_HOT,
+			'Open Topo Map': OpenTopoMap,
+			'Esri WorldImagery': Esri_WorldImagery,
+		};
+
+		var Layers = {};
+		var layerControl = L.control.layers(baseMaps, Layers, { collapsed: false });
+		layerControl.addTo(map);
+
+
+
+// List of Locations: array of objects//
+var locations = [
+	{
+		name: "Owl Petshop Jogja",
+		address: "Jl. Magelang No.255, Kota Yogyakarta",
+		lat: -7.7467127,
+		lng: 110.3822572,
+	},
+	{
+		name: "Pet Lovers Center",
+		lat: -7.7892,
+		lng: 110.3521
+	},
+	{
+		name: "Happy Tails Petshop",
+		lat: -7.7623,
+		lng: 110.4015
+	}
+	// and more...
+];
+
+// custom marker
+var customIcon1 = L.icon({
+  iconUrl: 'assets/assets/pet-marker.png',
+  iconSize: [20, 20]
+});
+
+
+// Loop for marker
+locations.forEach(function(loc) {
+	var marker = L.marker([loc.lat, loc.lng], { icon: customIcon1 });
+	var popupContent = "<b>" + loc.name + "</b>";
+	if (loc.address) {
+		popupContent += "<br>" + loc.address;
+	}
+	marker.bindPopup(popupContent);
+	marker.addTo(map);
+});
+
+fetch('assets/assets/jogja-wilayah.geojson') // file name
+.then(res => res.json()) 
+.then(geojsonData => { 
+L.geoJSON(geojsonData, { 
+style: { 
+color: "#5d4037", 
+weight: 1.5, 
+fillColor: "#efebe9", 
+fillOpacity: 0.1 
+} 
+}).addTo(map); 
+}) 
+.catch(err => console.warn("Gagal muat batas wilayah:", err));
+
+	</script>
+</body>
+</html>
